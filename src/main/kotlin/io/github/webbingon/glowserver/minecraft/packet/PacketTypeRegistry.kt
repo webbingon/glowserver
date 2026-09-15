@@ -2,8 +2,10 @@ package io.github.webbingon.glowserver.minecraft.packet
 
 import io.github.webbingon.glowserver.minecraft.ConnectionState
 import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundLoginPacketType
+import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundStatusPacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundHandshakePacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundLoginPacketType
+import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundStatusPacketType
 import kotlin.enums.enumEntries
 
 object PacketTypeRegistry {
@@ -11,8 +13,10 @@ object PacketTypeRegistry {
 
     init {
         register<ClientboundLoginPacketType>()
+        register<ClientboundStatusPacketType>()
         register<ServerboundHandshakePacketType>()
         register<ServerboundLoginPacketType>()
+        register<ServerboundStatusPacketType>()
     }
 
     private inline fun <reified T> register() where T : Enum<T>, T : PacketType {
