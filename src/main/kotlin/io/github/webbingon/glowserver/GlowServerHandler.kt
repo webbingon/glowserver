@@ -6,6 +6,7 @@ import io.github.webbingon.glowserver.minecraft.STATE_KEY
 import io.github.webbingon.glowserver.minecraft.packet.PacketDirection
 import io.github.webbingon.glowserver.minecraft.packet.PacketTypeRegistry
 import io.github.webbingon.glowserver.minecraft.packet.ServerStatus
+import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundLoginPacketType
 import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundStatusPacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundHandshakePacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundLoginPacketType
@@ -114,7 +115,7 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                     try {
                         val sessionId = Uuid.random()
 
-                        payload.writeVarInt(0x2)
+                        payload.writeVarInt(ClientboundLoginPacketType.LOGIN_SUCCESS.id)
                         payload.writeGameProfile(GameProfile(uuid, username, emptyList()))
                         payload.writeUuid(sessionId)
 
