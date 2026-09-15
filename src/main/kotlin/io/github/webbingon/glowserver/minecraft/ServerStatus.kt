@@ -1,4 +1,4 @@
-package io.github.webbingon.glowserver.minecraft.packet
+package io.github.webbingon.glowserver.minecraft
 
 import kotlinx.serialization.Serializable
 

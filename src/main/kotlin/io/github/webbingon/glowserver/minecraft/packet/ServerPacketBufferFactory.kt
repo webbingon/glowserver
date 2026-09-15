@@ -1,6 +1,7 @@
 package io.github.webbingon.glowserver.minecraft.packet
 
 import io.github.webbingon.glowserver.minecraft.GameProfile
+import io.github.webbingon.glowserver.minecraft.ServerStatus
 import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundLoginPacketType
 import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundStatusPacketType
 import io.github.webbingon.glowserver.util.toFramedBuffer

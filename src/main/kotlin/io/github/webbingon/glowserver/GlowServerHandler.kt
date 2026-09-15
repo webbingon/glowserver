@@ -6,7 +6,7 @@ import io.github.webbingon.glowserver.minecraft.STATE_KEY
 import io.github.webbingon.glowserver.minecraft.packet.ServerPacketBufferFactory
 import io.github.webbingon.glowserver.minecraft.packet.PacketDirection
 import io.github.webbingon.glowserver.minecraft.packet.PacketTypeRegistry
-import io.github.webbingon.glowserver.minecraft.packet.ServerStatus
+import io.github.webbingon.glowserver.minecraft.ServerStatus
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundHandshakePacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundLoginPacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundStatusPacketType
