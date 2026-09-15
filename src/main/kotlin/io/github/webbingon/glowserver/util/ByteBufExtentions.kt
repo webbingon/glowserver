@@ -1,7 +1,6 @@
 package io.github.webbingon.glowserver.util
 
 import io.github.webbingon.glowserver.minecraft.GameProfile
-import io.github.webbingon.glowserver.minecraft.GameProfileProperty
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
 import kotlin.uuid.Uuid
