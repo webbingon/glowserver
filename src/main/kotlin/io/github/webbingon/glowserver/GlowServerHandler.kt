@@ -3,26 +3,19 @@ package io.github.webbingon.glowserver
 import io.github.webbingon.glowserver.minecraft.GameProfile
 import io.github.webbingon.glowserver.minecraft.ConnectionState
 import io.github.webbingon.glowserver.minecraft.STATE_KEY
+import io.github.webbingon.glowserver.minecraft.packet.ServerPacketBufferFactory
 import io.github.webbingon.glowserver.minecraft.packet.PacketDirection
 import io.github.webbingon.glowserver.minecraft.packet.PacketTypeRegistry
 import io.github.webbingon.glowserver.minecraft.packet.ServerStatus
-import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundLoginPacketType
-import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundStatusPacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundHandshakePacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundLoginPacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundStatusPacketType
 import io.github.webbingon.glowserver.util.readString
 import io.github.webbingon.glowserver.util.readUuid
 import io.github.webbingon.glowserver.util.readVarInt
-import io.github.webbingon.glowserver.util.writeBytesWithVarInt
-import io.github.webbingon.glowserver.util.writeGameProfile
-import io.github.webbingon.glowserver.util.writeString
-import io.github.webbingon.glowserver.util.writeUuid
-import io.github.webbingon.glowserver.util.writeVarInt
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
-import kotlinx.serialization.json.Json
 import kotlin.collections.emptyList
 import kotlin.uuid.Uuid
 
@@ -67,18 +60,9 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                         enforcesSecureChat = false
                     )
 
-                    val payload = ctx.alloc().buffer()
-                    try {
-                        payload.writeVarInt(ClientboundStatusPacketType.STATUS_RESPONSE.id)
-                        payload.writeString(Json.encodeToString(serverStatus))
+                    val framedBuf = ServerPacketBufferFactory.createStatusResponsePacket(ctx.alloc(), serverStatus)
 
-                        val sendPacket = ctx.alloc().buffer()
-                        sendPacket.writeBytesWithVarInt(payload)
-
-                        ctx.writeAndFlush(sendPacket)
-                    } finally {
-                        payload.release()
-                    }
+                    ctx.writeAndFlush(framedBuf)
                 }
 
                 ServerboundStatusPacketType.PING_REQUEST -> {
@@ -86,18 +70,9 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
 
                     println("[Status/Ping Request] Timestamp: $timestamp, Sending pong response...")
 
-                    val payload = ctx.alloc().buffer()
-                    try {
-                        payload.writeVarInt(ClientboundStatusPacketType.PONG_RESPONSE.id)
-                        payload.writeLong(timestamp)
+                    val framedBuf = ServerPacketBufferFactory.createPongResponsePacket(ctx.alloc(), timestamp)
 
-                        val sendPacket = ctx.alloc().buffer()
-                        sendPacket.writeBytesWithVarInt(payload)
-
-                        ctx.writeAndFlush(sendPacket)
-                    } finally {
-                        payload.release()
-                    }
+                    ctx.writeAndFlush(framedBuf)
                 }
 
                 ServerboundLoginPacketType.LOGIN_START -> {
@@ -111,22 +86,10 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
 
                     println("[Login/Login Start] Player name: $username, Player UUID: $uuid")
 
-                    val payload = ctx.alloc().buffer()
-                    try {
-                        val sessionId = Uuid.random()
+                    val gameProfile = GameProfile(uuid, username, emptyList())
+                    val framedBuf = ServerPacketBufferFactory.createLoginSuccessPacket(ctx.alloc(), gameProfile)
 
-                        payload.writeVarInt(ClientboundLoginPacketType.LOGIN_SUCCESS.id)
-                        payload.writeGameProfile(GameProfile(uuid, username, emptyList()))
-                        payload.writeUuid(sessionId)
-
-                        val sendPacket = ctx.alloc().buffer()
-
-                        sendPacket.writeBytesWithVarInt(payload)
-
-                        ctx.writeAndFlush(sendPacket)
-                    } finally {
-                        payload.release()
-                    }
+                    ctx.writeAndFlush(framedBuf)
                 }
 
                 ServerboundLoginPacketType.LOGIN_ACKNOWLEDGED -> {

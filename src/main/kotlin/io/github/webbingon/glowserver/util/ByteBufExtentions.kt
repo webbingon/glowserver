@@ -2,6 +2,7 @@ package io.github.webbingon.glowserver.util
 
 import io.github.webbingon.glowserver.minecraft.GameProfile
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.ByteBufUtil
 import kotlin.uuid.Uuid
 
@@ -80,4 +81,10 @@ fun ByteBuf.writeGameProfile(profile: GameProfile) {
 fun ByteBuf.writeBytesWithVarInt(src: ByteBuf) {
     this.writeVarInt(src.readableBytes())
     this.writeBytes(src)
+}
+
+fun ByteBuf.toFramedBuffer(allocator: ByteBufAllocator) : ByteBuf {
+    val framed = allocator.buffer()
+    framed.writeBytesWithVarInt(this)
+    return framed
 }
