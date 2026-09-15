@@ -1,11 +1,14 @@
 package io.github.webbingon.glowserver
 
+import io.github.webbingon.glowserver.minecraft.MinecraftPacketDecoder
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.MultiThreadIoEventLoopGroup
 import io.netty.channel.nio.NioIoHandler
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.handler.logging.LogLevel
+import io.netty.handler.logging.LoggingHandler
 
 class GlowServer (val port: Int) {
     private val bossGroup = MultiThreadIoEventLoopGroup(NioIoHandler.newFactory())
@@ -22,7 +25,7 @@ class GlowServer (val port: Int) {
                 .channel(NioServerSocketChannel::class.java)
                 .childHandler(object : ChannelInitializer<SocketChannel>() {
                     override fun initChannel(ch: SocketChannel) {
-                        ch.pipeline().addLast(MinecraftPacketDecoder(), GlowServerHandler())
+                        ch.pipeline().addLast(MinecraftPacketDecoder(), LoggingHandler(LogLevel.INFO), GlowServerHandler())
                     }
                 })
 
