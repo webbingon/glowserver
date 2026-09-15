@@ -13,6 +13,7 @@ import io.github.webbingon.glowserver.util.readVarInt
 import io.github.webbingon.glowserver.util.writeBytesWithVarInt
 import io.github.webbingon.glowserver.util.writeGameProfile
 import io.github.webbingon.glowserver.util.writeUuid
+import io.github.webbingon.glowserver.util.writeVarInt
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
@@ -62,18 +63,21 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                     println("[Login/Login Start] Player name: $username, Player UUID: $uuid")
 
                     val payload = ctx.alloc().buffer()
+                    try {
+                        val sessionId = Uuid.random()
 
-                    val sessionId = Uuid.random()
+                        payload.writeVarInt(0x2)
+                        payload.writeGameProfile(GameProfile(uuid, username, emptyList()))
+                        payload.writeUuid(sessionId)
 
-                    payload.writeByte(0x2)
-                    payload.writeGameProfile(GameProfile(uuid, username, emptyList()))
-                    payload.writeUuid(sessionId)
+                        val sendPacket = ctx.alloc().buffer()
 
-                    val sendPacket = ctx.alloc().buffer()
+                        sendPacket.writeBytesWithVarInt(payload)
 
-                    sendPacket.writeBytesWithVarInt(payload)
-
-                    ctx.writeAndFlush(sendPacket)
+                        ctx.writeAndFlush(sendPacket)
+                    } finally {
+                        payload.release()
+                    }
                 }
 
                 ServerboundLoginPacketType.LOGIN_ACKNOWLEDGED -> {
