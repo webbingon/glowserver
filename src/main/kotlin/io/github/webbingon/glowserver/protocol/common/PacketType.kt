@@ -1,4 +1,4 @@
-package io.github.webbingon.glowserver.protocol
+package io.github.webbingon.glowserver.protocol.common
 
 interface PacketType {
     val id: Int

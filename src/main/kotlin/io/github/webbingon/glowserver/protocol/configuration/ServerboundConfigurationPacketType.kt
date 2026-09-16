@@ -1,8 +1,8 @@
-package io.github.webbingon.glowserver.protocol.serverbound
+package io.github.webbingon.glowserver.protocol.configuration
 
-import io.github.webbingon.glowserver.protocol.ConnectionState
-import io.github.webbingon.glowserver.protocol.PacketDirection
-import io.github.webbingon.glowserver.protocol.PacketType
+import io.github.webbingon.glowserver.protocol.common.ConnectionState
+import io.github.webbingon.glowserver.protocol.common.PacketDirection
+import io.github.webbingon.glowserver.protocol.common.PacketType
 
 @Suppress("unused")
 enum class ServerboundConfigurationPacketType(

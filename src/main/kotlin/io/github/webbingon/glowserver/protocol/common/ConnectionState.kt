@@ -1,4 +1,4 @@
-package io.github.webbingon.glowserver.protocol
+package io.github.webbingon.glowserver.protocol.common
 
 import io.netty.util.AttributeKey
 

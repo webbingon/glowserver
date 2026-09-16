@@ -1,12 +1,12 @@
-package io.github.webbingon.glowserver.protocol
+package io.github.webbingon.glowserver.protocol.common
 
-import io.github.webbingon.glowserver.protocol.clientbound.ClientboundConfigurationPacketType
-import io.github.webbingon.glowserver.protocol.clientbound.ClientboundLoginPacketType
-import io.github.webbingon.glowserver.protocol.clientbound.ClientboundStatusPacketType
-import io.github.webbingon.glowserver.protocol.serverbound.ServerboundConfigurationPacketType
-import io.github.webbingon.glowserver.protocol.serverbound.ServerboundHandshakePacketType
-import io.github.webbingon.glowserver.protocol.serverbound.ServerboundLoginPacketType
-import io.github.webbingon.glowserver.protocol.serverbound.ServerboundStatusPacketType
+import io.github.webbingon.glowserver.protocol.configuration.ClientboundConfigurationPacketType
+import io.github.webbingon.glowserver.protocol.configuration.ServerboundConfigurationPacketType
+import io.github.webbingon.glowserver.protocol.handshake.ServerboundHandshakePacketType
+import io.github.webbingon.glowserver.protocol.login.ClientboundLoginPacketType
+import io.github.webbingon.glowserver.protocol.login.ServerboundLoginPacketType
+import io.github.webbingon.glowserver.protocol.status.ClientboundStatusPacketType
+import io.github.webbingon.glowserver.protocol.status.ServerboundStatusPacketType
 import kotlin.enums.enumEntries
 
 object PacketTypeRegistry {

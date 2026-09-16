@@ -1,17 +1,17 @@
 package io.github.webbingon.glowserver
 
-import io.github.webbingon.glowserver.protocol.ClientboundFramedBufferFactory
-import io.github.webbingon.glowserver.protocol.ConnectionState
-import io.github.webbingon.glowserver.protocol.PacketDirection
-import io.github.webbingon.glowserver.protocol.PacketTypeRegistry
-import io.github.webbingon.glowserver.protocol.STATE_KEY
+import io.github.webbingon.glowserver.protocol.common.ClientboundFramedBufferFactory
+import io.github.webbingon.glowserver.protocol.common.ConnectionState
+import io.github.webbingon.glowserver.protocol.common.PacketDirection
+import io.github.webbingon.glowserver.protocol.common.PacketTypeRegistry
+import io.github.webbingon.glowserver.protocol.common.STATE_KEY
+import io.github.webbingon.glowserver.protocol.configuration.ServerboundConfigurationPacketType
+import io.github.webbingon.glowserver.protocol.handshake.ServerboundHandshakePacketType
+import io.github.webbingon.glowserver.protocol.login.ServerboundLoginPacketType
 import io.github.webbingon.glowserver.protocol.model.GameProfile
 import io.github.webbingon.glowserver.protocol.model.KnownPack
 import io.github.webbingon.glowserver.protocol.model.ServerStatus
-import io.github.webbingon.glowserver.protocol.serverbound.ServerboundConfigurationPacketType
-import io.github.webbingon.glowserver.protocol.serverbound.ServerboundHandshakePacketType
-import io.github.webbingon.glowserver.protocol.serverbound.ServerboundLoginPacketType
-import io.github.webbingon.glowserver.protocol.serverbound.ServerboundStatusPacketType
+import io.github.webbingon.glowserver.protocol.status.ServerboundStatusPacketType
 import io.github.webbingon.glowserver.util.readPrefixedArray
 import io.github.webbingon.glowserver.util.readString
 import io.github.webbingon.glowserver.util.readUuid

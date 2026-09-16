@@ -1,4 +1,4 @@
-package io.github.webbingon.glowserver.protocol
+package io.github.webbingon.glowserver.protocol.common
 
 import io.github.webbingon.glowserver.util.readVarInt
 import io.netty.buffer.ByteBuf

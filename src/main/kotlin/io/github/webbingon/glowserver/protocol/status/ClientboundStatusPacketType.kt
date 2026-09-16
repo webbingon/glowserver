@@ -1,8 +1,8 @@
-package io.github.webbingon.glowserver.protocol.clientbound
+package io.github.webbingon.glowserver.protocol.status
 
-import io.github.webbingon.glowserver.protocol.ConnectionState
-import io.github.webbingon.glowserver.protocol.PacketDirection
-import io.github.webbingon.glowserver.protocol.PacketType
+import io.github.webbingon.glowserver.protocol.common.ConnectionState
+import io.github.webbingon.glowserver.protocol.common.PacketDirection
+import io.github.webbingon.glowserver.protocol.common.PacketType
 
 enum class ClientboundStatusPacketType(
     override val id: Int,
