@@ -31,7 +31,11 @@ object PacketTypeRegistry {
         }
     }
 
-    fun get(id: Int, state: ConnectionState, direction: PacketDirection) : PacketType? {
+    fun get(
+        id: Int,
+        state: ConnectionState,
+        direction: PacketDirection,
+    ): PacketType? {
         val key = Triple(id, state, direction)
 
         return registryMap[key]

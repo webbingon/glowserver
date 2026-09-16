@@ -18,7 +18,10 @@ import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 
 object ClientboundFramedBufferFactory {
-    fun createStatusResponsePacket (allocator: ByteBufAllocator, serverStatus: ServerStatus) : ByteBuf {
+    fun createStatusResponsePacket(
+        allocator: ByteBufAllocator,
+        serverStatus: ServerStatus,
+    ): ByteBuf {
         val payload = allocator.buffer()
 
         try {
@@ -31,7 +34,10 @@ object ClientboundFramedBufferFactory {
         }
     }
 
-    fun createPongResponsePacket (allocator: ByteBufAllocator, timestamp: Long) : ByteBuf {
+    fun createPongResponsePacket(
+        allocator: ByteBufAllocator,
+        timestamp: Long,
+    ): ByteBuf {
         val payload = allocator.buffer()
 
         try {
@@ -44,7 +50,10 @@ object ClientboundFramedBufferFactory {
         }
     }
 
-    fun createLoginSuccessPacket (allocator: ByteBufAllocator, gameProfile: GameProfile) : ByteBuf {
+    fun createLoginSuccessPacket(
+        allocator: ByteBufAllocator,
+        gameProfile: GameProfile,
+    ): ByteBuf {
         val payload = allocator.buffer()
 
         try {
@@ -60,7 +69,11 @@ object ClientboundFramedBufferFactory {
         }
     }
 
-    fun createPluginMessagePacketWithStringData (allocator: ByteBufAllocator, identifier: String, data: String) : ByteBuf {
+    fun createPluginMessagePacketWithStringData(
+        allocator: ByteBufAllocator,
+        identifier: String,
+        data: String,
+    ): ByteBuf {
         val payload = allocator.buffer()
 
         try {
@@ -74,7 +87,10 @@ object ClientboundFramedBufferFactory {
         }
     }
 
-    fun createKnownPacksPacket (allocator: ByteBufAllocator, packs: Collection<KnownPack>) : ByteBuf {
+    fun createKnownPacksPacket(
+        allocator: ByteBufAllocator,
+        packs: Collection<KnownPack>,
+    ): ByteBuf {
         val payload = allocator.buffer()
 
         try {
@@ -92,7 +108,7 @@ object ClientboundFramedBufferFactory {
         }
     }
 
-    fun createFinishConfigurationPacket (allocator: ByteBufAllocator) : ByteBuf {
+    fun createFinishConfigurationPacket(allocator: ByteBufAllocator): ByteBuf {
         val payload = allocator.buffer()
 
         try {

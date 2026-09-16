@@ -1,13 +1,13 @@
 package io.github.webbingon.glowserver
 
-import io.github.webbingon.glowserver.minecraft.GameProfile
 import io.github.webbingon.glowserver.minecraft.ConnectionState
+import io.github.webbingon.glowserver.minecraft.GameProfile
 import io.github.webbingon.glowserver.minecraft.KnownPack
 import io.github.webbingon.glowserver.minecraft.STATE_KEY
+import io.github.webbingon.glowserver.minecraft.ServerStatus
 import io.github.webbingon.glowserver.minecraft.packet.ClientboundFramedBufferFactory
 import io.github.webbingon.glowserver.minecraft.packet.PacketDirection
 import io.github.webbingon.glowserver.minecraft.packet.PacketTypeRegistry
-import io.github.webbingon.glowserver.minecraft.ServerStatus
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundConfigurationPacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundHandshakePacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundLoginPacketType
@@ -28,7 +28,10 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
         ctx.channel().attr(STATE_KEY).set(ConnectionState.HANDSHAKE)
     }
 
-    override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
+    override fun channelRead(
+        ctx: ChannelHandlerContext,
+        msg: Any,
+    ) {
         val packet = msg as ByteBuf
 
         try {
@@ -51,18 +54,25 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                         state.set(ConnectionState.LOGIN)
                     }
 
-                    println("[Handshake/Handshake] Protocol version: $protocolVersion, Server address: $serverAddress, Server port: $serverPort, Intent: $intent")
+                    println(
+                        "[Handshake/Handshake] Protocol version: $protocolVersion, Server address: $serverAddress, Server port: $serverPort, Intent: $intent",
+                    )
                 }
 
                 ServerboundStatusPacketType.STATUS_REQUEST -> {
                     println("[Status/Status Request] Sending response...")
 
-                    val serverStatus = ServerStatus(
-                        version = ServerStatus.Version(ServerConstants.MINECRAFT_VERSION, ServerConstants.PROTOCOL_VERSION),
-                        players = ServerStatus.Players(ServerConstants.DEFAULT_MAX_PLAYERS, 0),
-                        description = ServerStatus.Description(ServerConstants.DEFAULT_MOTD),
-                        enforcesSecureChat = false
-                    )
+                    val serverStatus =
+                        ServerStatus(
+                            version =
+                                ServerStatus.Version(
+                                    ServerConstants.MINECRAFT_VERSION,
+                                    ServerConstants.PROTOCOL_VERSION,
+                                ),
+                            players = ServerStatus.Players(ServerConstants.DEFAULT_MAX_PLAYERS, 0),
+                            description = ServerStatus.Description(ServerConstants.DEFAULT_MOTD),
+                            enforcesSecureChat = false,
+                        )
 
                     val framedBuf = ClientboundFramedBufferFactory.createStatusResponsePacket(ctx.alloc(), serverStatus)
 
@@ -82,11 +92,12 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                 ServerboundLoginPacketType.LOGIN_START -> {
                     val username = packet.readString()
 
-                    val uuid = if (packet.readableBytes() >= 16) {
-                        packet.readUuid()
-                    } else {
-                        Uuid.random()
-                    }
+                    val uuid =
+                        if (packet.readableBytes() >= 16) {
+                            packet.readUuid()
+                        } else {
+                            Uuid.random()
+                        }
 
                     println("[Login/Login Start] Player name: $username, Player UUID: $uuid")
 
@@ -100,13 +111,22 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                     ctx.channel().attr(STATE_KEY).set(ConnectionState.CONFIGURATION)
                     println("[Login/Login Acknowledged] Switched the state to Configuration.")
 
-                    val pluginMessageFramedBuf = ClientboundFramedBufferFactory.createPluginMessagePacketWithStringData(ctx.alloc(), "minecraft:brand", ServerConstants.SERVER_BRAND_NAME)
+                    val pluginMessageFramedBuf =
+                        ClientboundFramedBufferFactory.createPluginMessagePacketWithStringData(
+                            ctx.alloc(),
+                            "minecraft:brand",
+                            ServerConstants.SERVER_BRAND_NAME,
+                        )
 
                     ctx.writeAndFlush(pluginMessageFramedBuf)
 
-                    val knownPacksFramedBuf = ClientboundFramedBufferFactory.createKnownPacksPacket(ctx.alloc(), listOf(
-                        KnownPack("minecraft", "core", ServerConstants.MINECRAFT_VERSION)
-                    ))
+                    val knownPacksFramedBuf =
+                        ClientboundFramedBufferFactory.createKnownPacksPacket(
+                            ctx.alloc(),
+                            listOf(
+                                KnownPack("minecraft", "core", ServerConstants.MINECRAFT_VERSION),
+                            ),
+                        )
 
                     ctx.writeAndFlush(knownPacksFramedBuf)
                 }
@@ -114,11 +134,12 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                 ServerboundConfigurationPacketType.PLUGIN_MESSAGE -> {
                     val identifier = packet.readString()
 
-                    val data = if (identifier == "minecraft:brand") {
-                        packet.readString()
-                    } else {
-                        null
-                    }
+                    val data =
+                        if (identifier == "minecraft:brand") {
+                            packet.readString()
+                        } else {
+                            null
+                        }
 
                     println("[Configuration/Plugin Message] Identifier: $identifier, Data: $data, Received the packet.")
                 }
@@ -134,36 +155,46 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                     val allowServerListings = packet.readBoolean()
                     val particleStatus = packet.readVarInt()
 
-                    println("[Configuration/Client Information] Locale: $locale, View distance: $viewDistance, Chat mode: $chatMode, Chat colors: $chatColors, Displayed Skin Parts: $displayedSkinParts, Main hand: $mainHand, Enable text filtering: $doEnableTextFiltering, Allow server listings: $allowServerListings, Particle status: $particleStatus, Received the packet.")
+                    println(
+                        "[Configuration/Client Information] Locale: $locale, View distance: $viewDistance, Chat mode: $chatMode, Chat colors: $chatColors, Displayed Skin Parts: $displayedSkinParts, Main hand: $mainHand, Enable text filtering: $doEnableTextFiltering, Allow server listings: $allowServerListings, Particle status: $particleStatus, Received the packet.",
+                    )
                 }
 
                 ServerboundConfigurationPacketType.KNOWN_PACKS -> {
-                    val knownPacks = packet.readPrefixedArray {
-                        val namespace = this.readString()
-                        val id = this.readString()
-                        val version = this.readString()
+                    val knownPacks =
+                        packet.readPrefixedArray {
+                            val namespace = this.readString()
+                            val id = this.readString()
+                            val version = this.readString()
 
-                        KnownPack(namespace, id, version)
-                    }
+                            KnownPack(namespace, id, version)
+                        }
 
                     println("[Configuration/Known Packs] Received the packet.")
 
                     for (pack in knownPacks) {
-                        println("[Configuration/Known Pack] Namespace: ${pack.namespace}, ID: ${pack.id}, Version: ${pack.version}")
+                        println(
+                            "[Configuration/Known Pack] Namespace: ${pack.namespace}, ID: ${pack.id}, Version: ${pack.version}",
+                        )
                     }
 
                     val resourceName = "registry_and_tags.bin"
-                    val inputStream = object {}.javaClass.classLoader.getResourceAsStream(resourceName)
-                        ?: throw FileNotFoundException("Resource $resourceName not found in resources folder.")
+                    val inputStream =
+                        object {}.javaClass.classLoader.getResourceAsStream(resourceName)
+                            ?: throw FileNotFoundException("Resource $resourceName not found in resources folder.")
 
                     val bytes = inputStream.readBytes()
                     val buffer = ctx.alloc().buffer(bytes.size).writeBytes(bytes)
 
                     ctx.writeAndFlush(buffer).addListener { future ->
-                        if(future.isSuccess) {
+                        if (future.isSuccess) {
                             println("Sent registry and tags.")
 
-                            val finishConfigurationFramedBuf = ClientboundFramedBufferFactory.createFinishConfigurationPacket(ctx.alloc())
+                            val finishConfigurationFramedBuf =
+                                ClientboundFramedBufferFactory
+                                    .createFinishConfigurationPacket(
+                                        ctx.alloc(),
+                                    )
                             ctx.writeAndFlush(finishConfigurationFramedBuf)
                         } else {
                             println("Failed to send registry and tags.")
@@ -182,7 +213,11 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                 }
 
                 else -> {
-                    println("[Unhandled Packet] State: $currentState, Packet Type: $packetType, ID: 0x${packetId.toString(16)}")
+                    println(
+                        "[Unhandled Packet] State: $currentState, Packet Type: $packetType, ID: 0x${packetId.toString(
+                            16,
+                        )}",
+                    )
                 }
             }
         } finally {
@@ -190,7 +225,10 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
         }
     }
 
-    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+    override fun exceptionCaught(
+        ctx: ChannelHandlerContext,
+        cause: Throwable,
+    ) {
         cause.printStackTrace()
         ctx.close()
     }

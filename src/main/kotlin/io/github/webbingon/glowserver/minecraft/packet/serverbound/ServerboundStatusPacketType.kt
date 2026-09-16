@@ -10,5 +10,5 @@ enum class ServerboundStatusPacketType(
     override val direction: PacketDirection = PacketDirection.SERVERBOUND,
 ) : PacketType {
     STATUS_REQUEST(0x0),
-    PING_REQUEST(0x1)
+    PING_REQUEST(0x1),
 }

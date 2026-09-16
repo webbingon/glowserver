@@ -10,7 +10,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.logging.LogLevel
 import io.netty.handler.logging.LoggingHandler
 
-class GlowServer (val port: Int) {
+class GlowServer(
+    val port: Int,
+) {
     private val bossGroup = MultiThreadIoEventLoopGroup(NioIoHandler.newFactory())
     private val workerGroup = MultiThreadIoEventLoopGroup(NioIoHandler.newFactory())
 
@@ -23,15 +25,24 @@ class GlowServer (val port: Int) {
             bootstrap
                 .group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
-                .childHandler(object : ChannelInitializer<SocketChannel>() {
-                    override fun initChannel(ch: SocketChannel) {
-                        ch.pipeline().addLast(MinecraftPacketDecoder(), LoggingHandler(LogLevel.INFO), GlowServerHandler())
-                    }
-                })
+                .childHandler(
+                    object : ChannelInitializer<SocketChannel>() {
+                        override fun initChannel(ch: SocketChannel) {
+                            ch.pipeline().addLast(
+                                MinecraftPacketDecoder(),
+                                LoggingHandler(LogLevel.INFO),
+                                GlowServerHandler(),
+                            )
+                        }
+                    },
+                )
 
-            val channelFuture = bootstrap.bind(port).addListener {
-                println("Glowserver is listening on port $port")
-            }.sync()
+            val channelFuture =
+                bootstrap
+                    .bind(port)
+                    .addListener {
+                        println("Glowserver is listening on port $port")
+                    }.sync()
 
             channelFuture.channel().closeFuture().sync()
         } finally {
@@ -40,7 +51,7 @@ class GlowServer (val port: Int) {
     }
 
     fun shutdown() {
-        if(!bossGroup.isShutdown) {
+        if (!bossGroup.isShutdown) {
             println("Shutting down...")
             workerGroup.shutdownGracefully()
             bossGroup.shutdownGracefully()

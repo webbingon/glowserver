@@ -8,17 +8,29 @@ data class ServerStatus(
     val players: Players? = null,
     val description: Description? = null,
     val favicon: String? = null,
-    val enforcesSecureChat: Boolean? = null
+    val enforcesSecureChat: Boolean? = null,
 ) {
     @Serializable
-    data class Version(val name: String, val protocol: Int)
+    data class Version(
+        val name: String,
+        val protocol: Int,
+    )
 
     @Serializable
-    data class Players(val max: Int, val online: Int, val sample: List<Sample>? = null) {
+    data class Players(
+        val max: Int,
+        val online: Int,
+        val sample: List<Sample>? = null,
+    ) {
         @Serializable
-        data class Sample(val name: String, val id: String)
+        data class Sample(
+            val name: String,
+            val id: String,
+        )
     }
 
     @Serializable
-    data class Description(val text: String)
+    data class Description(
+        val text: String,
+    )
 }

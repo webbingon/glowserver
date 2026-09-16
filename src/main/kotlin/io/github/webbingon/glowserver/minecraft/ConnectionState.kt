@@ -7,7 +7,7 @@ enum class ConnectionState {
     STATUS,
     LOGIN,
     CONFIGURATION,
-    PLAY
+    PLAY,
 }
 
 val STATE_KEY: AttributeKey<ConnectionState> = AttributeKey.valueOf("connection_state")

@@ -5,9 +5,11 @@ fun main(args: Array<String>) {
 
     val server = GlowServer(port)
 
-    Runtime.getRuntime().addShutdownHook(Thread {
-        server.shutdown()
-    })
+    Runtime.getRuntime().addShutdownHook(
+        Thread {
+            server.shutdown()
+        },
+    )
 
     server.run()
 }

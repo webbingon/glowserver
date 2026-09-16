@@ -8,8 +8,8 @@ import io.github.webbingon.glowserver.minecraft.packet.PacketType
 enum class ClientboundConfigurationPacketType(
     override val id: Int,
     override val state: ConnectionState = ConnectionState.CONFIGURATION,
-    override val direction: PacketDirection = PacketDirection.CLIENTBOUND
-) : PacketType{
+    override val direction: PacketDirection = PacketDirection.CLIENTBOUND,
+) : PacketType {
     COOKIE_REQUEST(0x0),
     PLUGIN_MESSAGE(0x1),
     DISCONNECT(0x2),
@@ -29,5 +29,5 @@ enum class ClientboundConfigurationPacketType(
     SERVER_LINKS(0x10),
     CLEAR_DIALOG(0x11),
     SHOW_DIALOG(0x12),
-    CODE_OF_CONDUCT(0x13)
+    CODE_OF_CONDUCT(0x13),
 }

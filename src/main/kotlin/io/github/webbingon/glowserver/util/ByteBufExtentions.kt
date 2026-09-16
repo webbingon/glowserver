@@ -14,7 +14,7 @@ fun ByteBuf.readVarInt(): Int {
 
         value = value or ((currentByte and 0x7F) shl position)
 
-        if(currentByte and 0x80 == 0) {
+        if (currentByte and 0x80 == 0) {
             return value
         }
     }
@@ -22,18 +22,18 @@ fun ByteBuf.readVarInt(): Int {
     throw IllegalArgumentException("VarInt is too big. VarInt must be between 1 and 5 bytes.")
 }
 
-fun ByteBuf.readString() : String {
+fun ByteBuf.readString(): String {
     val length = this.readVarInt()
     return this.readString(length, Charsets.UTF_8)
 }
 
-fun ByteBuf.readUuid() : Uuid {
+fun ByteBuf.readUuid(): Uuid {
     val msb = this.readLong()
     val lsb = this.readLong()
     return Uuid.fromLongs(msb, lsb)
 }
 
-inline fun <T> ByteBuf.readPrefixedArray(readElement: ByteBuf.() -> T) : List<T> {
+inline fun <T> ByteBuf.readPrefixedArray(readElement: ByteBuf.() -> T): List<T> {
     val count = this.readVarInt()
     val list = mutableListOf<T>()
 
@@ -66,7 +66,10 @@ fun ByteBuf.writeUuid(uuid: Uuid) {
     this.writeBytes(byteArray)
 }
 
-inline fun <T> ByteBuf.writePrefixedArray(elements: Collection<T>, writeElement: ByteBuf.(T) -> Unit) {
+inline fun <T> ByteBuf.writePrefixedArray(
+    elements: Collection<T>,
+    writeElement: ByteBuf.(T) -> Unit,
+) {
     this.writeVarInt(elements.count())
     for (element in elements) {
         writeElement(element)
@@ -80,7 +83,7 @@ fun ByteBuf.writeGameProfile(profile: GameProfile) {
         this.writeString(element.name)
         this.writeString(element.value)
 
-        if(element.signature != null) {
+        if (element.signature != null) {
             this.writeBoolean(true)
             this.writeString(element.signature)
         } else {
@@ -94,7 +97,7 @@ fun ByteBuf.writeBytesWithVarInt(src: ByteBuf) {
     this.writeBytes(src)
 }
 
-fun ByteBuf.toFramedBuffer(allocator: ByteBufAllocator) : ByteBuf {
+fun ByteBuf.toFramedBuffer(allocator: ByteBufAllocator): ByteBuf {
     val framed = allocator.buffer()
     framed.writeBytesWithVarInt(this)
     return framed
