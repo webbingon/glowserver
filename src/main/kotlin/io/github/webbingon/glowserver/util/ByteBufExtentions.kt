@@ -33,6 +33,17 @@ fun ByteBuf.readUuid() : Uuid {
     return Uuid.fromLongs(msb, lsb)
 }
 
+inline fun <T> ByteBuf.readPrefixedArray(readElement: ByteBuf.() -> T) : List<T> {
+    val count = this.readVarInt()
+    val list = mutableListOf<T>()
+
+    repeat(count) {
+        list.add(readElement())
+    }
+
+    return list
+}
+
 fun ByteBuf.writeVarInt(value: Int) {
     var currentValue = value
 

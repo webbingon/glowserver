@@ -1,8 +1,10 @@
 package io.github.webbingon.glowserver.minecraft.packet
 
 import io.github.webbingon.glowserver.minecraft.ConnectionState
+import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundConfigurationPacketType
 import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundLoginPacketType
 import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundStatusPacketType
+import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundConfigurationPacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundHandshakePacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundLoginPacketType
 import io.github.webbingon.glowserver.minecraft.packet.serverbound.ServerboundStatusPacketType
@@ -12,8 +14,10 @@ object PacketTypeRegistry {
     private val registryMap = mutableMapOf<Triple<Int, ConnectionState, PacketDirection>, PacketType>()
 
     init {
+        register<ClientboundConfigurationPacketType>()
         register<ClientboundLoginPacketType>()
         register<ClientboundStatusPacketType>()
+        register<ServerboundConfigurationPacketType>()
         register<ServerboundHandshakePacketType>()
         register<ServerboundLoginPacketType>()
         register<ServerboundStatusPacketType>()
