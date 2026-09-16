@@ -17,7 +17,7 @@ import io.netty.buffer.ByteBufAllocator
 import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 
-object ServerPacketBufferFactory {
+object ClientboundFramedBufferFactory {
     fun createStatusResponsePacket (allocator: ByteBufAllocator, serverStatus: ServerStatus) : ByteBuf {
         val payload = allocator.buffer()
 

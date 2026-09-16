@@ -4,7 +4,7 @@ import io.github.webbingon.glowserver.minecraft.GameProfile
 import io.github.webbingon.glowserver.minecraft.ConnectionState
 import io.github.webbingon.glowserver.minecraft.KnownPack
 import io.github.webbingon.glowserver.minecraft.STATE_KEY
-import io.github.webbingon.glowserver.minecraft.packet.ServerPacketBufferFactory
+import io.github.webbingon.glowserver.minecraft.packet.ClientboundFramedBufferFactory
 import io.github.webbingon.glowserver.minecraft.packet.PacketDirection
 import io.github.webbingon.glowserver.minecraft.packet.PacketTypeRegistry
 import io.github.webbingon.glowserver.minecraft.ServerStatus
@@ -64,7 +64,7 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                         enforcesSecureChat = false
                     )
 
-                    val framedBuf = ServerPacketBufferFactory.createStatusResponsePacket(ctx.alloc(), serverStatus)
+                    val framedBuf = ClientboundFramedBufferFactory.createStatusResponsePacket(ctx.alloc(), serverStatus)
 
                     ctx.writeAndFlush(framedBuf)
                 }
@@ -74,7 +74,7 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
 
                     println("[Status/Ping Request] Timestamp: $timestamp, Sending pong response...")
 
-                    val framedBuf = ServerPacketBufferFactory.createPongResponsePacket(ctx.alloc(), timestamp)
+                    val framedBuf = ClientboundFramedBufferFactory.createPongResponsePacket(ctx.alloc(), timestamp)
 
                     ctx.writeAndFlush(framedBuf)
                 }
@@ -91,7 +91,7 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                     println("[Login/Login Start] Player name: $username, Player UUID: $uuid")
 
                     val gameProfile = GameProfile(uuid, username, emptyList())
-                    val framedBuf = ServerPacketBufferFactory.createLoginSuccessPacket(ctx.alloc(), gameProfile)
+                    val framedBuf = ClientboundFramedBufferFactory.createLoginSuccessPacket(ctx.alloc(), gameProfile)
 
                     ctx.writeAndFlush(framedBuf)
                 }
@@ -100,11 +100,11 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                     ctx.channel().attr(STATE_KEY).set(ConnectionState.CONFIGURATION)
                     println("[Login/Login Acknowledged] Switched the state to Configuration.")
 
-                    val pluginMessageFramedBuf = ServerPacketBufferFactory.createPluginMessagePacketWithStringData(ctx.alloc(), "minecraft:brand", ServerConstants.SERVER_BRAND_NAME)
+                    val pluginMessageFramedBuf = ClientboundFramedBufferFactory.createPluginMessagePacketWithStringData(ctx.alloc(), "minecraft:brand", ServerConstants.SERVER_BRAND_NAME)
 
                     ctx.writeAndFlush(pluginMessageFramedBuf)
 
-                    val knownPacksFramedBuf = ServerPacketBufferFactory.createKnownPacksPacket(ctx.alloc(), listOf(
+                    val knownPacksFramedBuf = ClientboundFramedBufferFactory.createKnownPacksPacket(ctx.alloc(), listOf(
                         KnownPack("minecraft", "core", ServerConstants.MINECRAFT_VERSION)
                     ))
 
@@ -163,7 +163,7 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                         if(future.isSuccess) {
                             println("Sent registry and tags.")
 
-                            val finishConfigurationFramedBuf = ServerPacketBufferFactory.createFinishConfigurationPacket(ctx.alloc())
+                            val finishConfigurationFramedBuf = ClientboundFramedBufferFactory.createFinishConfigurationPacket(ctx.alloc())
                             ctx.writeAndFlush(finishConfigurationFramedBuf)
                         } else {
                             println("Failed to send registry and tags.")
