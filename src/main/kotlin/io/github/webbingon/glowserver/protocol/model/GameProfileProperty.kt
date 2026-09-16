@@ -1,6 +1,6 @@
 package io.github.webbingon.glowserver.protocol.model
 
-class GameProfileProperty(
+data class GameProfileProperty(
     val name: String,
     val value: String,
     val signature: String?,
