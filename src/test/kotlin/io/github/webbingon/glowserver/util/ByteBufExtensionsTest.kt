@@ -1,7 +1,7 @@
 package io.github.webbingon.glowserver.util
 
-import io.github.webbingon.glowserver.minecraft.GameProfile
-import io.github.webbingon.glowserver.minecraft.GameProfileProperty
+import io.github.webbingon.glowserver.protocol.model.GameProfile
+import io.github.webbingon.glowserver.protocol.model.GameProfileProperty
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled

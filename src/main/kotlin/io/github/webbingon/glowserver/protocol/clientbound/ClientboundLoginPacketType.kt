@@ -1,8 +1,8 @@
-package io.github.webbingon.glowserver.minecraft.packet.clientbound
+package io.github.webbingon.glowserver.protocol.clientbound
 
-import io.github.webbingon.glowserver.minecraft.ConnectionState
-import io.github.webbingon.glowserver.minecraft.packet.PacketDirection
-import io.github.webbingon.glowserver.minecraft.packet.PacketType
+import io.github.webbingon.glowserver.protocol.ConnectionState
+import io.github.webbingon.glowserver.protocol.PacketDirection
+import io.github.webbingon.glowserver.protocol.PacketType
 
 @Suppress("unused")
 enum class ClientboundLoginPacketType(

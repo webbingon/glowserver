@@ -1,6 +1,6 @@
 package io.github.webbingon.glowserver.util
 
-import io.github.webbingon.glowserver.minecraft.GameProfile
+import io.github.webbingon.glowserver.protocol.model.GameProfile
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.ByteBufUtil

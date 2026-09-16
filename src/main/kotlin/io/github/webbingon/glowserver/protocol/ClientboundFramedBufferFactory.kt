@@ -1,11 +1,11 @@
-package io.github.webbingon.glowserver.minecraft.packet
+package io.github.webbingon.glowserver.protocol
 
-import io.github.webbingon.glowserver.minecraft.GameProfile
-import io.github.webbingon.glowserver.minecraft.KnownPack
-import io.github.webbingon.glowserver.minecraft.ServerStatus
-import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundConfigurationPacketType
-import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundLoginPacketType
-import io.github.webbingon.glowserver.minecraft.packet.clientbound.ClientboundStatusPacketType
+import io.github.webbingon.glowserver.protocol.clientbound.ClientboundConfigurationPacketType
+import io.github.webbingon.glowserver.protocol.clientbound.ClientboundLoginPacketType
+import io.github.webbingon.glowserver.protocol.clientbound.ClientboundStatusPacketType
+import io.github.webbingon.glowserver.protocol.model.GameProfile
+import io.github.webbingon.glowserver.protocol.model.KnownPack
+import io.github.webbingon.glowserver.protocol.model.ServerStatus
 import io.github.webbingon.glowserver.util.toFramedBuffer
 import io.github.webbingon.glowserver.util.writeGameProfile
 import io.github.webbingon.glowserver.util.writePrefixedArray

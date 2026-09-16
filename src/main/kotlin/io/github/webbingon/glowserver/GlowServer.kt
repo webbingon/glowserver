@@ -1,6 +1,6 @@
 package io.github.webbingon.glowserver
 
-import io.github.webbingon.glowserver.minecraft.MinecraftPacketDecoder
+import io.github.webbingon.glowserver.protocol.MinecraftPacketDecoder
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.MultiThreadIoEventLoopGroup
