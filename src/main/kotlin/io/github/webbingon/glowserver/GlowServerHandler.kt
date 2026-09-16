@@ -17,13 +17,9 @@ import io.github.webbingon.glowserver.util.readString
 import io.github.webbingon.glowserver.util.readUuid
 import io.github.webbingon.glowserver.util.readVarInt
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
-import io.netty.channel.DefaultFileRegion
-import java.io.File
 import java.io.FileNotFoundException
-import java.io.RandomAccessFile
 import kotlin.collections.emptyList
 import kotlin.uuid.Uuid
 

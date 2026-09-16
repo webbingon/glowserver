@@ -14,12 +14,7 @@ import io.github.webbingon.glowserver.util.writeUuid
 import io.github.webbingon.glowserver.util.writeVarInt
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
-import io.netty.buffer.Unpooled
-import io.netty.channel.DefaultFileRegion
 import kotlinx.serialization.json.Json
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.RandomAccessFile
 import kotlin.uuid.Uuid
 
 object ServerPacketBufferFactory {
