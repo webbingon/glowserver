@@ -15,7 +15,7 @@ import kotlin.uuid.Uuid
 class ByteBufExtensionsTest {
     @Test
     fun readVarInt() {
-        val buffer = Unpooled.wrappedBuffer(byteArrayOf(0xAC.toByte(), 0x02))
+        val buffer = Unpooled.wrappedBuffer(byteArrayOf(0xAC.toByte(), 0x02.toByte()))
 
         try {
             assertEquals(300, buffer.readVarInt())
@@ -108,7 +108,7 @@ class ByteBufExtensionsTest {
         buffer.writeByte(30)
 
         try {
-            assertEquals(listOf<Short>(10, 20, 30), buffer.readPrefixedArray<Short> { readUnsignedByte() })
+            assertEquals(listOf<Short>(10, 20, 30), buffer.readPrefixedArray { readUnsignedByte() })
         } finally {
             buffer.release()
         }
@@ -122,7 +122,7 @@ class ByteBufExtensionsTest {
 
         try {
             assertFailsWith<IndexOutOfBoundsException> {
-                buffer.readPrefixedArray<Short> { readUnsignedByte() }
+                buffer.readPrefixedArray { readUnsignedByte() }
             }
         } finally {
             buffer.release()
