@@ -1,22 +1,32 @@
 package io.github.webbingon.glowserver
 
-import io.github.webbingon.glowserver.protocol.common.ClientboundFramedBufferFactory
 import io.github.webbingon.glowserver.protocol.common.ConnectionState
 import io.github.webbingon.glowserver.protocol.common.PacketDirection
 import io.github.webbingon.glowserver.protocol.common.PacketTypeRegistry
 import io.github.webbingon.glowserver.protocol.common.STATE_KEY
-import io.github.webbingon.glowserver.protocol.configuration.ServerboundConfigurationPacketType
-import io.github.webbingon.glowserver.protocol.handshake.ServerboundHandshakePacketType
-import io.github.webbingon.glowserver.protocol.login.ServerboundLoginPacketType
+import io.github.webbingon.glowserver.protocol.configuration.clientbound.ClientboundFinishConfigurationPacket
+import io.github.webbingon.glowserver.protocol.configuration.clientbound.ClientboundKnownPacksPacket
+import io.github.webbingon.glowserver.protocol.configuration.clientbound.ClientboundPluginMessagePacket
+import io.github.webbingon.glowserver.protocol.configuration.serverbound.ServerboundClientInformationPacket
+import io.github.webbingon.glowserver.protocol.configuration.serverbound.ServerboundConfigurationPacketType
+import io.github.webbingon.glowserver.protocol.handshake.HandshakeIntent
+import io.github.webbingon.glowserver.protocol.handshake.serverbound.ServerboundHandshakePacket
+import io.github.webbingon.glowserver.protocol.handshake.serverbound.ServerboundHandshakePacketType
+import io.github.webbingon.glowserver.protocol.login.clientbound.ClientboundLoginSuccessPacket
+import io.github.webbingon.glowserver.protocol.login.serverbound.ServerboundLoginPacketType
 import io.github.webbingon.glowserver.protocol.model.GameProfile
 import io.github.webbingon.glowserver.protocol.model.KnownPack
 import io.github.webbingon.glowserver.protocol.model.ServerStatus
-import io.github.webbingon.glowserver.protocol.status.ServerboundStatusPacketType
+import io.github.webbingon.glowserver.protocol.status.clientbound.ClientboundStatusPongResponsePacket
+import io.github.webbingon.glowserver.protocol.status.clientbound.ClientboundStatusResponsePacket
+import io.github.webbingon.glowserver.protocol.status.serverbound.ServerboundStatusPacketType
 import io.github.webbingon.glowserver.util.readPrefixedArray
 import io.github.webbingon.glowserver.util.readString
 import io.github.webbingon.glowserver.util.readUuid
 import io.github.webbingon.glowserver.util.readVarInt
+import io.github.webbingon.glowserver.util.writeString
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.ByteBufUtil
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
 import java.io.FileNotFoundException
@@ -32,111 +42,106 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
         ctx: ChannelHandlerContext,
         msg: Any,
     ) {
-        val packet = msg as ByteBuf
+        val buf = msg as ByteBuf
 
         try {
             val currentState = ctx.channel().attr(STATE_KEY).get()
-            val packetId = packet.readVarInt()
-            val packetType = PacketTypeRegistry.get(packetId, currentState, PacketDirection.SERVERBOUND)
-
-            when (packetType) {
+            val packetId = buf.readVarInt()
+            when (val packetType = PacketTypeRegistry.get(packetId, currentState, PacketDirection.SERVERBOUND)) {
                 ServerboundHandshakePacketType.HANDSHAKE -> {
-                    val protocolVersion = packet.readVarInt()
-                    val serverAddress = packet.readString()
-                    val serverPort = packet.readUnsignedShort()
-                    val intent = packet.readVarInt()
+                    val packet = ServerboundHandshakePacket.read(buf)
 
                     val state = ctx.channel().attr(STATE_KEY)
 
-                    if (intent == 1) {
+                    if (packet.intent == HandshakeIntent.STATUS) {
                         state.set(ConnectionState.STATUS)
-                    } else if (intent == 2 || intent == 3) {
+                    } else if (packet.intent == HandshakeIntent.TRANSFER || packet.intent == HandshakeIntent.LOGIN) {
                         state.set(ConnectionState.LOGIN)
                     }
 
                     println(
-                        "[Handshake/Handshake] Protocol version: $protocolVersion, Server address: $serverAddress, Server port: $serverPort, Intent: $intent",
+                        "[Handshake/Handshake] Protocol version: ${packet.protocolVersion}, Server address: ${packet.serverAddress}, Server port: ${packet.serverPort}, Intent: ${packet.intent}",
                     )
                 }
 
                 ServerboundStatusPacketType.STATUS_REQUEST -> {
                     println("[Status/Status Request] Sending response...")
 
-                    val serverStatus =
-                        ServerStatus(
-                            version =
-                                ServerStatus.Version(
-                                    ServerConstants.MINECRAFT_VERSION,
-                                    ServerConstants.PROTOCOL_VERSION,
-                                ),
-                            players = ServerStatus.Players(ServerConstants.DEFAULT_MAX_PLAYERS, 0),
-                            description = ServerStatus.Description(ServerConstants.DEFAULT_MOTD),
-                            enforcesSecureChat = false,
-                        )
-
-                    val framedBuf = ClientboundFramedBufferFactory.createStatusResponsePacket(ctx.alloc(), serverStatus)
-
-                    ctx.writeAndFlush(framedBuf)
+                    ctx.writeAndFlush(
+                        ClientboundStatusResponsePacket(
+                            ServerStatus(
+                                version =
+                                    ServerStatus.Version(
+                                        ServerConstants.MINECRAFT_VERSION,
+                                        ServerConstants.PROTOCOL_VERSION,
+                                    ),
+                                players = ServerStatus.Players(ServerConstants.DEFAULT_MAX_PLAYERS, 0),
+                                description = ServerStatus.Description(ServerConstants.DEFAULT_MOTD),
+                                enforcesSecureChat = false,
+                            ),
+                        ),
+                    )
                 }
 
                 ServerboundStatusPacketType.PING_REQUEST -> {
-                    val timestamp = packet.readLong()
+                    val timestamp = buf.readLong()
 
                     println("[Status/Ping Request] Timestamp: $timestamp, Sending pong response...")
 
-                    val framedBuf = ClientboundFramedBufferFactory.createPongResponsePacket(ctx.alloc(), timestamp)
-
-                    ctx.writeAndFlush(framedBuf)
+                    ctx.writeAndFlush(ClientboundStatusPongResponsePacket(timestamp))
                 }
 
                 ServerboundLoginPacketType.LOGIN_START -> {
-                    val username = packet.readString()
+                    val username = buf.readString()
 
                     val uuid =
-                        if (packet.readableBytes() >= 16) {
-                            packet.readUuid()
+                        if (buf.readableBytes() >= 16) {
+                            buf.readUuid()
                         } else {
                             Uuid.random()
                         }
 
                     println("[Login/Login Start] Player name: $username, Player UUID: $uuid")
 
-                    val gameProfile = GameProfile(uuid, username, emptyList())
-                    val framedBuf = ClientboundFramedBufferFactory.createLoginSuccessPacket(ctx.alloc(), gameProfile)
-
-                    ctx.writeAndFlush(framedBuf)
+                    ctx.writeAndFlush(
+                        ClientboundLoginSuccessPacket(
+                            GameProfile(uuid, username, emptyList()),
+                            uuid,
+                        ),
+                    )
                 }
 
                 ServerboundLoginPacketType.LOGIN_ACKNOWLEDGED -> {
                     ctx.channel().attr(STATE_KEY).set(ConnectionState.CONFIGURATION)
                     println("[Login/Login Acknowledged] Switched the state to Configuration.")
 
-                    val pluginMessageFramedBuf =
-                        ClientboundFramedBufferFactory.createPluginMessagePacketWithStringData(
-                            ctx.alloc(),
+                    val pluginMessageData = ctx.alloc().buffer()
+                    pluginMessageData.writeString(ServerConstants.SERVER_BRAND_NAME)
+
+                    ctx.writeAndFlush(
+                        ClientboundPluginMessagePacket(
                             "minecraft:brand",
-                            ServerConstants.SERVER_BRAND_NAME,
-                        )
+                            ByteBufUtil.getBytes(pluginMessageData),
+                        ),
+                    )
 
-                    ctx.writeAndFlush(pluginMessageFramedBuf)
+                    pluginMessageData.release()
 
-                    val knownPacksFramedBuf =
-                        ClientboundFramedBufferFactory.createKnownPacksPacket(
-                            ctx.alloc(),
+                    ctx.writeAndFlush(
+                        ClientboundKnownPacksPacket(
                             listOf(
                                 KnownPack("minecraft", "core", ServerConstants.MINECRAFT_VERSION),
                             ),
-                        )
-
-                    ctx.writeAndFlush(knownPacksFramedBuf)
+                        ),
+                    )
                 }
 
                 ServerboundConfigurationPacketType.PLUGIN_MESSAGE -> {
-                    val identifier = packet.readString()
+                    val identifier = buf.readString()
 
                     val data =
                         if (identifier == "minecraft:brand") {
-                            packet.readString()
+                            buf.readString()
                         } else {
                             null
                         }
@@ -145,24 +150,16 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                 }
 
                 ServerboundConfigurationPacketType.CLIENT_INFORMATION -> {
-                    val locale = packet.readString()
-                    val viewDistance = packet.readByte().toInt()
-                    val chatMode = packet.readVarInt()
-                    val chatColors = packet.readBoolean()
-                    val displayedSkinParts = packet.readUnsignedByte().toInt()
-                    val mainHand = packet.readVarInt()
-                    val doEnableTextFiltering = packet.readBoolean()
-                    val allowServerListings = packet.readBoolean()
-                    val particleStatus = packet.readVarInt()
+                    val packet = ServerboundClientInformationPacket.read(buf)
 
                     println(
-                        "[Configuration/Client Information] Locale: $locale, View distance: $viewDistance, Chat mode: $chatMode, Chat colors: $chatColors, Displayed Skin Parts: $displayedSkinParts, Main hand: $mainHand, Enable text filtering: $doEnableTextFiltering, Allow server listings: $allowServerListings, Particle status: $particleStatus, Received the packet.",
+                        "[Configuration/Client Information] Locale: ${packet.locale}, View distance: ${packet.viewDistance}, Chat mode: ${packet.chatMode}, Chat colors: ${packet.chatColors}, Displayed Skin Parts: ${packet.displayedSkinParts}, Main hand: ${packet.mainHand}, Enable text filtering: ${packet.doEnableTextFiltering}, Allow server listings: ${packet.doAllowServerListings}, Particle status: ${packet.particleStatus}, Received the packet.",
                     )
                 }
 
                 ServerboundConfigurationPacketType.KNOWN_PACKS -> {
                     val knownPacks =
-                        packet.readPrefixedArray {
+                        buf.readPrefixedArray {
                             val namespace = this.readString()
                             val id = this.readString()
                             val version = this.readString()
@@ -172,9 +169,9 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
 
                     println("[Configuration/Known Packs] Received the packet.")
 
-                    for (pack in knownPacks) {
+                    for ((namespace, id, version) in knownPacks) {
                         println(
-                            "[Configuration/Known Pack] Namespace: ${pack.namespace}, ID: ${pack.id}, Version: ${pack.version}",
+                            "[Configuration/Known Pack] Namespace: $namespace, ID: $id, Version: $version",
                         )
                     }
 
@@ -189,13 +186,7 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                     ctx.writeAndFlush(buffer).addListener { future ->
                         if (future.isSuccess) {
                             println("Sent registry and tags.")
-
-                            val finishConfigurationFramedBuf =
-                                ClientboundFramedBufferFactory
-                                    .createFinishConfigurationPacket(
-                                        ctx.alloc(),
-                                    )
-                            ctx.writeAndFlush(finishConfigurationFramedBuf)
+                            ctx.writeAndFlush(ClientboundFinishConfigurationPacket)
                         } else {
                             println("Failed to send registry and tags.")
                             ctx.close()
@@ -221,7 +212,7 @@ class GlowServerHandler : ChannelInboundHandlerAdapter() {
                 }
             }
         } finally {
-            packet.release()
+            buf.release()
         }
     }
 

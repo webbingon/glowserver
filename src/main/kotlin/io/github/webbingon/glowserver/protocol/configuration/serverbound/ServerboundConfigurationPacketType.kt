@@ -1,4 +1,4 @@
-package io.github.webbingon.glowserver.protocol.configuration
+package io.github.webbingon.glowserver.protocol.configuration.serverbound
 
 import io.github.webbingon.glowserver.protocol.common.ConnectionState
 import io.github.webbingon.glowserver.protocol.common.PacketDirection

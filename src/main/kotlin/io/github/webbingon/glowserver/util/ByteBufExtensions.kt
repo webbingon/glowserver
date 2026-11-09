@@ -22,9 +22,36 @@ fun ByteBuf.readVarInt(): Int {
     throw IllegalArgumentException("VarInt is too big. VarInt must be between 1 and 5 bytes.")
 }
 
-fun ByteBuf.readString(): String {
-    val length = this.readVarInt()
-    return this.readString(length, Charsets.UTF_8)
+/**
+ * Gets a [String] which is prefixed by the size in bytes as a VarInt.
+ *
+ * @param maxChars Maximum characters length
+ * @return A decoded string
+ * @throws IllegalArgumentException If the prefix size is wrong
+ * @throws IllegalArgumentException If the string exceeds maximum byte length or character length
+ */
+fun ByteBuf.readString(maxChars: Int = 32767): String {
+    val maxBytes = maxChars * 3
+    val byteLength = this.readVarInt()
+
+    require(byteLength >= 0) { "The byte length of string cannot be negative: $byteLength" }
+    require(
+        byteLength <= maxBytes,
+    ) { "The byte length of string ($byteLength) exceeds maximum byte length ($maxBytes for max chars $maxChars)" }
+
+    val readableBytes = this.readableBytes()
+
+    require(
+        byteLength <= readableBytes,
+    ) { "String is expected $byteLength bytes, but only $readableBytes available" }
+
+    val decodedString = this.readString(byteLength, Charsets.UTF_8)
+
+    require(decodedString.length <= maxChars) {
+        "String character length (${decodedString.length}) maximum length ($maxChars)"
+    }
+
+    return decodedString
 }
 
 fun ByteBuf.readUuid(): Uuid {

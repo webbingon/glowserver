@@ -68,7 +68,7 @@ class ByteBufExtensionsTest {
         buffer.writeVarInt(-1)
 
         try {
-            assertFailsWith<StringIndexOutOfBoundsException> { buffer.readString() }
+            assertFailsWith<IllegalArgumentException> { buffer.readString() }
         } finally {
             buffer.release()
         }

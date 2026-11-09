@@ -1,6 +1,7 @@
 package io.github.webbingon.glowserver
 
-import io.github.webbingon.glowserver.protocol.common.MinecraftPacketDecoder
+import io.github.webbingon.glowserver.protocol.codec.MinecraftPacketDecoder
+import io.github.webbingon.glowserver.protocol.codec.MinecraftPacketEncoder
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.MultiThreadIoEventLoopGroup
@@ -31,6 +32,7 @@ class GlowServer(
                             ch.pipeline().addLast(
                                 MinecraftPacketDecoder(),
                                 LoggingHandler(LogLevel.INFO),
+                                MinecraftPacketEncoder(),
                                 GlowServerHandler(),
                             )
                         }
